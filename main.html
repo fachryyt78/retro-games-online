@@ -290,3 +290,76 @@
       </div>
     </div>
   </div>
+
+  <div class="hud">
+    <span>SCORE: <strong id="hud-score">0</strong></span>
+    <span>LEVEL: <strong id="hud-level">1</strong></span>
+    <span>LIVES: <strong id="hud-lives">3</strong></span>
+  </div>
+
+  <div class="touch-buttons" id="touch-buttons">
+    <button type="button" class="up" aria-label="Up">&#8593;</button>
+    <button type="button" class="left" aria-label="Left">&#8592;</button>
+    <button type="button" class="right" aria-label="Right">&#8594;</button>
+    <button type="button" class="down" aria-label="Down">&#8595;</button>
+  </div>
+
+  <p class="controls">
+    <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> or <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> &nbsp; Pause: <kbd>P</kbd>
+  </p>
+
+  <section class="about" id="shortcuts">
+    <h3>KEYBOARD</h3>
+    <p>Up / W — hop up. Down / S — hop down. Left / A — hop left. Right / D — hop right. P — pause and resume. All other keys are ignored during play.</p>
+  </section>
+
+  <section class="about">
+    <p>Retro Games Online — Frogget. Single-page web game. No account required. High scores stored locally. Change speed in Settings to make the game easier (Slow) or harder (Fast).</p>
+  </section>
+
+  <section class="about">
+    <p>© Retro Games Online. Frogget contract: single Java file, no readonly; immutable config; constructor-set; unique contract id and hex constants.</p>
+  </section>
+
+  <section class="about">
+    <p>Play again: click START or RESTART. Pause with P. Adjust speed in Settings for a different challenge.</p>
+  </section>
+
+  <section class="about">
+    <p>Compatible with desktop and mobile. Touch devices show on-screen direction buttons. Enjoy the game!</p>
+    <p>Frogget — Ribbit-cross lane ledger. Retro style. Have fun!</p>
+    <!-- Retro Games Online — Frogget web interface -->
+  </section>
+
+  <section class="high-scores">
+    <h3>HIGH SCORES</h3>
+    <ol id="high-score-list"></ol>
+  </section>
+
+  <section class="settings-panel">
+    <h3>SETTINGS</h3>
+    <label><input type="checkbox" id="opt-sound" checked /> Sound effects (placeholder)</label>
+    <label>Speed: <select id="opt-speed"><option value="12">Normal</option><option value="10">Slow</option><option value="14">Fast</option></select></label>
+  </section>
+
+  <section class="about" id="how-to-play">
+    <h3 style="font-size:8px;color:var(--frog);margin-bottom:8px;">HOW TO PLAY</h3>
+    <p>Guide the frog from the bottom safe zone (green) to the top. Each lane has cars moving left or right. One hop per key press. Reach the top to clear the level and earn points. Get hit and you lose a life; no lives left is game over. Higher levels add more and faster traffic. Good luck!</p>
+  </section>
+
+  <section class="about" id="tips">
+    <h3>TIPS</h3>
+    <p>Wait for a gap before crossing. Time your hops so you land between cars. The top and bottom rows are safe — catch your breath there. Use the pause key (P) if you need a break. High scores are saved in this browser.</p>
+  </section>
+
+  <section class="about" id="levels">
+    <h3>LEVELS</h3>
+    <p>Level 1–2: Few cars, slow. Level 3–4: More cars. Level 5+: Denser traffic. Speed and spawn rate increase with level. No upper level cap in this web version.</p>
+  </section>
+
+  <section class="about" id="credits">
+    <h3>CREDITS</h3>
+    <p>Frogget game logic and constants are defined in a single Java file (Frogget.java). This web interface reproduces the same rules: 11 columns, 9 rows, 7 traffic lanes, 3 lives, 4 ticks per vehicle move. Safe zones at row 0 and row 8. Score 100 + level×10 per crossing; 50 bonus per level clear. No token, no claim. Part of Retro Games Online.</p>
+    <p>Font: Press Start 2P (Google Fonts). Colors: green grass #2d5016, frog #7cb342, cars red/blue/yellow. Canvas 352×384 px, cell 32×32. FPS selectable (10/12/14) in Settings.</p>
+  </section>
+

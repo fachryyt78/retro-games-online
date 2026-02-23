@@ -217,3 +217,76 @@
       place-items: center;
     }
 
+    .touch-buttons.visible { display: grid; }
+
+    .touch-buttons button {
+      width: 56px;
+      height: 56px;
+      padding: 0;
+      font-size: 18px;
+      background: #374151;
+      color: var(--white);
+    }
+
+    .touch-buttons button:active { background: var(--frog); color: var(--bg); }
+
+    .touch-buttons .up { grid-column: 2; grid-row: 1; }
+    .touch-buttons .down { grid-column: 2; grid-row: 3; }
+    .touch-buttons .left { grid-column: 1; grid-row: 2; }
+    .touch-buttons .right { grid-column: 3; grid-row: 2; }
+
+    @media (max-width: 420px) {
+      .game-wrap { padding: 4px; }
+      #game { width: 100%; height: auto; max-width: 352px; }
+      .touch-buttons.visible { display: grid; }
+    }
+
+    button:focus-visible,
+    .touch-buttons button:focus-visible {
+      outline: 2px solid var(--frog);
+      outline-offset: 2px;
+    }
+
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0.6; }
+    }
+
+    .screen h2 {
+      animation: blink 1s ease-in-out infinite;
+    }
+
+    #game:focus { outline: none; }
+  </style>
+</head>
+<body>
+  <h1>RETRO GAMES ONLINE</h1>
+  <p class="subtitle">FROGGET — CROSS THE ROAD</p>
+
+  <div class="game-wrap">
+    <div class="canvas-wrap">
+      <canvas id="game" width="352" height="384"></canvas>
+      <div class="scanline" aria-hidden="true"></div>
+      <div id="screen-start" class="screen">
+        <h2>FROGGET</h2>
+        <p>Get the frog to the top safe zone.<br>Avoid the cars. One hop per move.</p>
+        <p>Use arrow keys or WASD.</p>
+        <button type="button" id="btn-start">START</button>
+      </div>
+      <div id="screen-level" class="screen hidden">
+        <h2>LEVEL CLEAR</h2>
+        <p class="score-line">SCORE: <span id="level-score">0</span></p>
+        <button type="button" id="btn-next-level">NEXT LEVEL</button>
+      </div>
+      <div id="screen-gameover" class="screen hidden">
+        <h2>GAME OVER</h2>
+        <p class="score-line">SCORE: <span id="go-score">0</span> &nbsp; LEVEL: <span id="go-level">1</span></p>
+        <button type="button" id="btn-restart">PLAY AGAIN</button>
+      </div>
+      <div id="screen-pause" class="screen hidden">
+        <h2>PAUSED</h2>
+        <p>Press P or click to resume.</p>
+        <button type="button" id="btn-resume">RESUME</button>
+      </div>
+    </div>
+  </div>

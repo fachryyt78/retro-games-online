@@ -509,3 +509,149 @@
         state.gameOver = false;
         state.levelComplete = false;
         state.paused = false;
+        state.lanes = buildLanes(state.level);
+      }
+
+      function moveFrog(dRow, dCol) {
+        if (state.gameOver || state.levelComplete || state.paused) return;
+        const nr = state.frogRow + dRow;
+        const nc = state.frogCol + dCol;
+        if (nr < 0 || nr > ROWS || nc < 0 || nc >= COLS) return;
+        state.frogRow = nr;
+        state.frogCol = nc;
+        state.frogFrame = 1;
+        if (nr === SAFE_TOP) {
+          state.score += POINTS_BASE_CROSS + state.level * 10;
+          state.levelComplete = true;
+          document.getElementById('level-score').textContent = state.score;
+          document.getElementById('screen-level').classList.remove('hidden');
+          document.getElementById('screen-gameover').classList.add('hidden');
+          document.getElementById('screen-start').classList.add('hidden');
+          document.getElementById('screen-pause').classList.add('hidden');
+        }
+      }
+
+      function checkCollision() {
+        if (state.frogRow <= SAFE_BOTTOM) return false;
+        const li = state.frogRow - SAFE_BOTTOM - 1;
+        if (li < 0 || li >= state.lanes.length) return false;
+        const lane = state.lanes[li];
+        for (const ob of lane.obstacles) {
+          if (state.frogCol >= ob.col && state.frogCol < ob.col + ob.length) return true;
+        }
+        return false;
+      }
+
+      function updateLanes() {
+        for (const lane of state.lanes) {
+          const dir = lane.direction;
+          for (const ob of lane.obstacles) ob.col += dir;
+          lane.obstacles = lane.obstacles.filter(ob => ob.col + ob.length >= 0 && ob.col < COLS);
+          if (state.tick % 8 === 0 && Math.random() < 0.15) {
+            const length = 2 + Math.floor(Math.random() * 2);
+            const startCol = dir === DIR_RIGHT ? -length : COLS;
+            const sprite = Math.floor(Math.random() * 3);
+            lane.obstacles.push({ col: startCol, length: length, sprite: sprite });
+          }
+        }
+      }
+
+      function tick() {
+        if (state.gameOver || state.levelComplete || state.paused) return;
+        state.tick++;
+        if (state.frogFrame > 0) state.frogFrame = 0;
+        if (state.tick % TICKS_PER_MOVE !== 0) return;
+        updateLanes();
+        if (checkCollision()) {
+          state.lives--;
+          if (state.lives <= 0) {
+            state.gameOver = true;
+            addHighScore(state.score, state.level);
+            document.getElementById('go-score').textContent = state.score;
+            document.getElementById('go-level').textContent = state.level;
+            document.getElementById('screen-gameover').classList.remove('hidden');
+            document.getElementById('screen-level').classList.add('hidden');
+            document.getElementById('screen-start').classList.add('hidden');
+            document.getElementById('screen-pause').classList.add('hidden');
+          } else {
+            state.frogRow = FROG_START_ROW;
+            state.frogCol = Math.floor(COLS / 2);
+          }
+        }
+      }
+
+      const CAR_COLORS = ['#c62828', '#1565c0', '#f9a825'];
+
+      function draw() {
+        ctx.fillStyle = '#1a1a1a';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let r = 0; r <= ROWS; r++) {
+          const y = r * CELL_H;
+          if (r === SAFE_TOP || r === SAFE_BOTTOM) {
+            ctx.fillStyle = '#2d5016';
+            ctx.fillRect(0, y, canvas.width, CELL_H);
+            ctx.fillStyle = '#1a1a1a';
+            for (let c = 0; c < COLS; c++) {
+              ctx.fillRect(c * CELL_W + 2, y + 2, CELL_W - 4, CELL_H - 4);
+            }
+            ctx.fillStyle = '#374151';
+            ctx.fillRect(0, y + CELL_H - 4, canvas.width, 2);
+          } else {
+            ctx.fillStyle = '#252525';
+            ctx.fillRect(0, y, canvas.width, CELL_H);
+            ctx.fillStyle = '#333';
+            for (let c = 0; c < COLS; c++) {
+              ctx.fillRect(c * CELL_W, y + CELL_H / 2 - 1, CELL_W, 2);
+            }
+            const li = r - SAFE_BOTTOM - 1;
+            if (li >= 0 && li < state.lanes.length) {
+              const lane = state.lanes[li];
+              for (const ob of lane.obstacles) {
+                ctx.fillStyle = CAR_COLORS[ob.sprite % CAR_COLORS.length];
+                for (let i = 0; i < ob.length; i++) {
+                  const x = (ob.col + i) * CELL_W;
+                  if (x >= -CELL_W && x < canvas.width) {
+                    ctx.fillRect(x + 2, y + 2, CELL_W - 4, CELL_H - 4);
+                    ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                    ctx.fillRect(x + 4, y + 4, 6, 6);
+                    ctx.fillStyle = CAR_COLORS[ob.sprite % CAR_COLORS.length];
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        const fx = state.frogCol * CELL_W;
+        const fy = state.frogRow * CELL_H;
+        const pad = state.frogFrame === 1 ? 2 : 4;
+        ctx.fillStyle = '#7cb342';
+        ctx.fillRect(fx + pad, fy + pad, CELL_W - pad * 2, CELL_H - pad * 2);
+        ctx.strokeStyle = '#2d5016';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(fx + pad, fy + pad, CELL_W - pad * 2, CELL_H - pad * 2);
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.fillRect(fx + pad + 4, fy + pad + 2, 4, 4);
+
+        document.getElementById('hud-score').textContent = state.score;
+        document.getElementById('hud-level').textContent = state.level;
+        document.getElementById('hud-lives').textContent = state.lives;
+      }
+
+      let lastTick = 0;
+      function loop(now) {
+        const fps = getFPS();
+        const msPerTick = 1000 / fps;
+        if (!state.gameOver && !state.levelComplete && !state.paused) {
+          const elapsed = Math.min(5, Math.floor((now - lastTick) / msPerTick));
+          for (let i = 0; i < elapsed; i++) tick();
+          lastTick = now;
+        } else if (state.paused) {
+          lastTick = now;
+        }
+        draw();
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(function (now) { lastTick = now; requestAnimationFrame(loop); });
+

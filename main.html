@@ -655,3 +655,76 @@
       }
       requestAnimationFrame(function (now) { lastTick = now; requestAnimationFrame(loop); });
 
+      document.addEventListener('keydown', function (e) {
+        if (e.code === 'KeyP') {
+          e.preventDefault();
+          if (state.gameOver || state.levelComplete) return;
+          state.paused = !state.paused;
+          const el = document.getElementById('screen-pause');
+          if (state.paused) el.classList.remove('hidden');
+          else el.classList.add('hidden');
+          return;
+        }
+        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','KeyW','KeyA','KeyS','KeyD'].indexOf(e.code) >= 0) e.preventDefault();
+        switch (e.code) {
+          case 'ArrowUp': case 'KeyW': moveFrog(-1, 0); break;
+          case 'ArrowDown': case 'KeyS': moveFrog(1, 0); break;
+          case 'ArrowLeft': case 'KeyA': moveFrog(0, -1); break;
+          case 'ArrowRight': case 'KeyD': moveFrog(0, 1); break;
+          default: break;
+        }
+      });
+
+      document.getElementById('btn-start').addEventListener('click', function () {
+        resetGame();
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-level').classList.add('hidden');
+        document.getElementById('screen-gameover').classList.add('hidden');
+        document.getElementById('screen-pause').classList.add('hidden');
+      });
+
+      document.getElementById('btn-next-level').addEventListener('click', function () {
+        state.level++;
+        state.score += 50;
+        initLevel();
+        document.getElementById('screen-level').classList.add('hidden');
+      });
+
+      document.getElementById('btn-restart').addEventListener('click', function () {
+        resetGame();
+        document.getElementById('screen-gameover').classList.add('hidden');
+        document.getElementById('screen-level').classList.add('hidden');
+        document.getElementById('screen-start').classList.add('hidden');
+        document.getElementById('screen-pause').classList.add('hidden');
+      });
+
+      document.getElementById('btn-resume').addEventListener('click', function () {
+        state.paused = false;
+        document.getElementById('screen-pause').classList.add('hidden');
+      });
+
+      document.getElementById('screen-pause').addEventListener('click', function (e) {
+        if (e.target === e.currentTarget || e.target.id === 'btn-resume') {
+          state.paused = false;
+          document.getElementById('screen-pause').classList.add('hidden');
+        }
+      });
+
+      const touchBtns = document.getElementById('touch-buttons');
+      if ('ontouchstart' in window) touchBtns.classList.add('visible');
+      touchBtns.querySelector('.up').addEventListener('click', () => moveFrog(-1, 0));
+      touchBtns.querySelector('.down').addEventListener('click', () => moveFrog(1, 0));
+      touchBtns.querySelector('.left').addEventListener('click', () => moveFrog(0, -1));
+      touchBtns.querySelector('.right').addEventListener('click', () => moveFrog(0, 1));
+
+      renderHighScores();
+
+      // -----------------------------------------------------------------------
+      // Helpers and compatibility
+      // -----------------------------------------------------------------------
+      function isTouchDevice() {
+        return 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      }
+
+      function persistState() {
+        try {

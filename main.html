@@ -728,3 +728,74 @@
 
       function persistState() {
         try {
+          const data = {
+            score: state.score,
+            level: state.level,
+            lives: state.lives,
+            ts: Date.now()
+          };
+          sessionStorage.setItem('frogget_session', JSON.stringify(data));
+        } catch (e) {}
+      }
+
+      function hasStoredSession() {
+        try {
+          const raw = sessionStorage.getItem('frogget_session');
+          if (!raw) return false;
+          const data = JSON.parse(raw);
+          return data && typeof data.score === 'number' && Date.now() - (data.ts || 0) < 3600000;
+        } catch (e) { return false; }
+      }
+
+      window.froggetGetState = function () {
+        return {
+          score: state.score,
+          level: state.level,
+          lives: state.lives,
+          gameOver: state.gameOver,
+          levelComplete: state.levelComplete
+        };
+      };
+
+      window.froggetReset = resetGame;
+
+      document.getElementById('opt-speed').addEventListener('change', function () {
+        lastTick = performance.now();
+      });
+
+      document.getElementById('opt-sound').addEventListener('change', function () {
+        // Placeholder: could wire to Web Audio or mute flag for future SFX
+      });
+
+      // Optional: expose FPS and constants for debugging
+      window.froggetFPS = getFPS;
+      window.froggetConstants = {
+        COLS: COLS,
+        ROWS: ROWS,
+        LANES: LANES,
+        POINTS_BASE_CROSS: POINTS_BASE_CROSS,
+        POINTS_LEVEL_BONUS: POINTS_LEVEL_BONUS
+      };
+
+      var LEVEL_DESCRIPTIONS = [
+        'Level 1: Start slow. Two cars per lane.',
+        'Level 2: Same pace, get used to the rhythm.',
+        'Level 3: More cars. Watch both directions.',
+        'Level 4: Denser traffic. Plan your path.',
+        'Level 5: Harder. Time your hops carefully.',
+        'Level 6: Even more vehicles. No room for error.',
+        'Level 7: Expert. Quick decisions needed.',
+        'Level 8: Very hard. Patience and timing.',
+        'Level 9: Near maximum density.',
+        'Level 10+: Maximum challenge.'
+      ];
+
+      window.froggetLevelDescription = function (level) {
+        var idx = Math.min(level - 1, LEVEL_DESCRIPTIONS.length - 1);
+        return LEVEL_DESCRIPTIONS[idx >= 0 ? idx : 0] || 'Level ' + level;
+      };
+    })();
+  </script>
+</body>
+</html>
+

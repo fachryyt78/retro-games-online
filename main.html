@@ -363,3 +363,76 @@
     <p>Font: Press Start 2P (Google Fonts). Colors: green grass #2d5016, frog #7cb342, cars red/blue/yellow. Canvas 352×384 px, cell 32×32. FPS selectable (10/12/14) in Settings.</p>
   </section>
 
+  <footer class="about">
+    Frogget — retro frog crossing. No token, no claim. Contract logic: single file, constructor-set config. Part of Retro Games Online.
+  </footer>
+
+  <script>
+    (function () {
+      // -----------------------------------------------------------------------
+      // Frogget — retro frog crossing. Constants match contract defaults where
+      // applicable (COLS 11, ROWS 9, LANES 7, 3 lives, etc.)
+      // -----------------------------------------------------------------------
+      // loadHighScores / saveHighScores: localStorage key frogget_high_scores
+      // buildLanes(level): one lane per row 1..LANES, alternating direction
+      // initLevel: reset frog to bottom center, rebuild lanes for current level
+      // resetGame: full reset for new game
+      // moveFrog(dRow,dCol): clamp to grid, detect safe top row for level clear
+      // checkCollision: true if frog cell overlaps any obstacle in current lane
+      // updateLanes: move obstacles by direction, remove off-screen, spawn new
+      // tick: advance time, run updateLanes every TICKS_PER_MOVE, then collision
+      // draw: clear canvas, draw safe zones (green), road (grey), cars, frog
+      // loop: requestAnimationFrame, elapsed ticks from getFPS(), then draw
+      // Key handlers: Arrow/WASD move, P toggles pause
+      // Buttons: START (hide start screen), NEXT LEVEL (level++, initLevel), RESTART, RESUME
+      // Touch: optional D-pad for mobile when ontouchstart is present
+      // -----------------------------------------------------------------------
+      // Grid: rows 0 (safe top), 1..7 (lanes), 8 (safe bottom). Cols 0..10.
+      // Frog start: row 8, col 5. Goal: row 0.
+      // Obstacles: col + length; move by +1 or -1 per tick block.
+      // Spawn: probability 0.15 every 8 ticks; length 2 or 3; sprite 0/1/2 for color.
+      // CAR_COLORS: red, blue, yellow. Frog: green with dark border and eye highlight.
+      // High scores: sorted by score desc, max 10; stored as { score, level, ts }.
+      // Pause: state.paused; no tick(), draw() still runs; P or Resume button.
+      // -----------------------------------------------------------------------
+      const COLS = 11;
+      const ROWS = 9;
+      const CELL_W = 32;
+      const CELL_H = 32;
+      const LANES = 7;
+      const SAFE_TOP = 0;
+      const SAFE_BOTTOM = 8;
+      const FROG_START_ROW = 8;
+      const TICKS_PER_MOVE = 4;
+      const DIR_LEFT = -1;
+      const DIR_RIGHT = 1;
+      const HIGH_SCORE_KEY = 'frogget_high_scores';
+      const MAX_HIGH_SCORES = 10;
+      const DEFAULT_FPS = 12;
+
+      // Points: 100 base + level*10 per safe cross; 50 bonus on level advance (matches Frogget.java)
+      const POINTS_BASE_CROSS = 100;
+      const POINTS_LEVEL_BONUS = 50;
+
+      function getFPS() {
+        const el = document.getElementById('opt-speed');
+        return el ? parseInt(el.value, 10) || DEFAULT_FPS : DEFAULT_FPS;
+      }
+
+      const canvas = document.getElementById('game');
+      const ctx = canvas.getContext('2d');
+
+      let state = {
+        frogRow: FROG_START_ROW,
+        frogCol: Math.floor(COLS / 2),
+        lives: 3,
+        score: 0,
+        level: 1,
+        tick: 0,
+        gameOver: false,
+        levelComplete: false,
+        paused: false,
+        lanes: [],
+        frogFrame: 0
+      };
+

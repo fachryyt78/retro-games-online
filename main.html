@@ -436,3 +436,76 @@
         frogFrame: 0
       };
 
+      function loadHighScores() {
+        try {
+          const raw = localStorage.getItem(HIGH_SCORE_KEY);
+          if (raw) return JSON.parse(raw);
+        } catch (e) {}
+        return [];
+      }
+
+      function saveHighScores(list) {
+        try {
+          localStorage.setItem(HIGH_SCORE_KEY, JSON.stringify(list.slice(0, MAX_HIGH_SCORES)));
+        } catch (e) {}
+      }
+
+      function addHighScore(score, level) {
+        const list = loadHighScores();
+        list.push({ score: score, level: level, ts: Date.now() });
+        list.sort((a, b) => b.score - a.score);
+        saveHighScores(list);
+        renderHighScores();
+      }
+
+      function renderHighScores() {
+        const list = loadHighScores();
+        const ol = document.getElementById('high-score-list');
+        ol.innerHTML = '';
+        list.slice(0, MAX_HIGH_SCORES).forEach((entry, i) => {
+          const li = document.createElement('li');
+          li.innerHTML = '<span>' + (i + 1) + '. Lv.' + entry.level + '</span><span class="score">' + entry.score + '</span>';
+          ol.appendChild(li);
+        });
+        if (list.length === 0) {
+          const li = document.createElement('li');
+          li.textContent = 'No scores yet';
+          li.style.color = '#6b7280';
+          ol.appendChild(li);
+        }
+      }
+
+      function buildLanes(level) {
+        const lanes = [];
+        for (let r = 1; r <= LANES; r++) {
+          const dir = (r + level) % 2 === 0 ? DIR_RIGHT : DIR_LEFT;
+          const obstacles = [];
+          const len = 2 + Math.min(level, 3);
+          for (let i = 0; i < len; i++) {
+            const length = 2 + (i % 2);
+            const col = dir === DIR_RIGHT ? -length - i * 4 : COLS + i * 4;
+            const sprite = (r + i) % 3;
+            obstacles.push({ col: col, length: length, sprite: sprite });
+          }
+          lanes.push({ row: r, direction: dir, obstacles: obstacles });
+        }
+        return lanes;
+      }
+
+      function initLevel() {
+        state.frogRow = FROG_START_ROW;
+        state.frogCol = Math.floor(COLS / 2);
+        state.levelComplete = false;
+        state.lanes = buildLanes(state.level);
+      }
+
+      function resetGame() {
+        state.frogRow = FROG_START_ROW;
+        state.frogCol = Math.floor(COLS / 2);
+        state.lives = 3;
+        state.score = 0;
+        state.level = 1;
+        state.tick = 0;
+        state.gameOver = false;
+        state.levelComplete = false;
+        state.paused = false;
